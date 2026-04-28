@@ -30,6 +30,13 @@ export async function clearTraces(): Promise<void> {
   await db.spans.clear();
 }
 
+export async function deleteTrace(traceId: string): Promise<void> {
+  await Promise.all([
+    db.traces.delete(traceId),
+    db.spans.where('trace_id').equals(traceId).delete(),
+  ]);
+}
+
 // Span operations
 export async function upsertSpan(span: Span): Promise<void> {
   await db.spans.put(span);

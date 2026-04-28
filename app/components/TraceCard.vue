@@ -57,17 +57,27 @@
               v-html="highlightText(shortTraceId)"
             />
           </div>
-          <span
-            class="text-xs font-bold px-2 py-1 rounded uppercase tracking-wide shrink-0"
-            :class="{
-              'bg-green-500/20 text-green-400':
-                getStatusColor(trace.status_code) === 'success',
-              'bg-red-500/20 text-red-400':
-                getStatusColor(trace.status_code) === 'error',
-            }"
-          >
-            {{ getStatusLabel(trace.status_code) }}
-          </span>
+          <div class="flex items-center gap-1 shrink-0">
+            <span
+              class="text-xs font-bold px-2 py-1 rounded uppercase tracking-wide"
+              :class="{
+                'bg-green-500/20 text-green-400':
+                  getStatusColor(trace.status_code) === 'success',
+                'bg-red-500/20 text-red-400':
+                  getStatusColor(trace.status_code) === 'error',
+              }"
+            >
+              {{ getStatusLabel(trace.status_code) }}
+            </span>
+            <button
+              v-if="!compareMode"
+              @click.stop="$emit('delete', trace.trace_id)"
+              class="p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Delete trace"
+            >
+              <IconPhTrashBold class="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         <!-- Meta Info -->
@@ -128,6 +138,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   select: [traceId: string];
   toggleCompare: [traceId: string];
+  delete: [traceId: string];
 }>();
 
 function handleClick() {

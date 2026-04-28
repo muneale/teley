@@ -5,6 +5,7 @@ import {
   getTraces as dbGetTraces,
   clearTraces as dbClearTraces,
   setTraceCustomName as dbSetTraceCustomName,
+  deleteTrace as dbDeleteTrace,
 } from '../database/operations';
 import { onTraceUpdate, addServiceNames, clearServiceNames } from './useDataSync';
 
@@ -12,6 +13,7 @@ interface UseTracesReturn {
   traces: Ref<Trace[]>;
   clearAllTraces: () => Promise<boolean>;
   renameTrace: (traceId: string, customName: string | null) => Promise<void>;
+  deleteTrace: (traceId: string) => Promise<void>;
 }
 
 export function useTraces(): UseTracesReturn {
@@ -84,9 +86,15 @@ export function useTraces(): UseTracesReturn {
     }
   };
 
+  const deleteTrace = async (traceId: string): Promise<void> => {
+    await dbDeleteTrace(traceId);
+    traces.value = traces.value.filter((t) => t.trace_id !== traceId);
+  };
+
   return {
     traces,
     clearAllTraces,
     renameTrace,
+    deleteTrace,
   };
 }

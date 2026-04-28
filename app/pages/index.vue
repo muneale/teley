@@ -12,6 +12,7 @@
         :compare-with-trace-id="compareWithTraceId"
         @help="setupDialog?.open()"
         @compare-started="compareWithTraceId = null"
+        @delete-trace="confirmDelete"
       />
     </aside>
 
@@ -52,6 +53,7 @@
       <TracesSetupGuide />
     </ModalDialog>
 
+    <DeleteTraceConfirmDialog confirm-text="Delete" variant="danger" />
   </div>
 </template>
 
@@ -61,8 +63,27 @@ const selectedTraceId = ref<string | null>(null);
 const compareWithTraceId = ref<string | null>(null);
 const setupDialog = useTemplateRef('setupGuideDialog');
 
-const { traces } = useTraces();
+const { traces, deleteTrace } = useTraces();
 const { selectedServices, hasMultipleServices } = useServiceFilter();
+
+const pendingDeleteId = ref<string | null>(null);
+const [DeleteTraceConfirmDialog, triggerDeleteConfirm] = useConfirmation(async () => {
+  const id = pendingDeleteId.value;
+  pendingDeleteId.value = null;
+  if (!id) return;
+  if (selectedTraceId.value === id) {
+    selectedTraceId.value = null;
+  }
+  if (compareWithTraceId.value === id) {
+    compareWithTraceId.value = null;
+  }
+  await deleteTrace(id);
+});
+
+function confirmDelete(traceId: string) {
+  pendingDeleteId.value = traceId;
+  triggerDeleteConfirm('Delete trace?', 'This trace and its spans will be permanently removed from your local browser storage.');
+}
 
 const filteredTraces = computed(() => {
   if (!hasMultipleServices.value) return traces.value;

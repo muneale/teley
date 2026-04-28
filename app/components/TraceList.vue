@@ -94,6 +94,7 @@
           :is-compare-disabled="trace.trace_id === lockedTraceId"
           @select="selectedTraceId = $event"
           @toggle-compare="handleToggleCompare"
+          @delete="$emit('deleteTrace', $event)"
         />
       </template>
     </div>
@@ -147,6 +148,7 @@ const selectedTraceId = defineModel<string | null>({ required: true });
 const emit = defineEmits<{
   help: [];
   compareStarted: [];
+  deleteTrace: [traceId: string];
 }>();
 
 const searchQuery = ref('');
