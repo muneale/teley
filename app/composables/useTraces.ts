@@ -4,12 +4,14 @@ import type { Trace, Span } from '../../shared/parsers/types';
 import {
   getTraces as dbGetTraces,
   clearTraces as dbClearTraces,
+  setTraceCustomName as dbSetTraceCustomName,
 } from '../database/operations';
 import { onTraceUpdate, addServiceNames, clearServiceNames } from './useDataSync';
 
 interface UseTracesReturn {
   traces: Ref<Trace[]>;
   clearAllTraces: () => Promise<boolean>;
+  renameTrace: (traceId: string, customName: string | null) => Promise<void>;
 }
 
 export function useTraces(): UseTracesReturn {
@@ -73,8 +75,18 @@ export function useTraces(): UseTracesReturn {
     });
   });
 
+  const renameTrace = async (traceId: string, customName: string | null): Promise<void> => {
+    const value = customName?.trim() || null;
+    await dbSetTraceCustomName(traceId, value);
+    const idx = traces.value.findIndex((t) => t.trace_id === traceId);
+    if (idx >= 0) {
+      traces.value[idx] = { ...traces.value[idx]!, custom_name: value || undefined };
+    }
+  };
+
   return {
     traces,
     clearAllTraces,
+    renameTrace,
   };
 }

@@ -24,6 +24,7 @@
         v-else-if="trace && spans.length > 0"
         :trace="trace"
         :spans="spans"
+        readonly
         @select-span="selectedSpan = $event"
       />
     </main>

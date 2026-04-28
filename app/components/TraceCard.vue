@@ -36,7 +36,20 @@
         <div class="flex items-start justify-between gap-3 mb-3">
           <div class="flex-1 min-w-0 space-y-1">
             <h3
+              v-if="trace.custom_name"
+              class="font-semibold text-zinc-100 text-sm leading-tight flex items-center gap-1.5"
+            >
+              <IconPhTagBold class="w-3 h-3 text-amber-400 shrink-0" />
+              <span class="truncate" v-html="highlightText(trace.custom_name)" />
+            </h3>
+            <h3
+              v-else
               class="font-semibold text-zinc-100 text-sm leading-tight"
+              v-html="highlightText(trace.operation_name)"
+            />
+            <p
+              v-if="trace.custom_name"
+              class="text-xs text-zinc-500 truncate"
               v-html="highlightText(trace.operation_name)"
             />
             <p

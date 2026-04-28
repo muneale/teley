@@ -13,6 +13,7 @@ export interface Trace {
   status_message: string | null;
   source: TraceSource;
   created_at?: number;
+  custom_name?: string;
 }
 
 export interface Span {

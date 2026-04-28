@@ -218,6 +218,9 @@ const filteredTraces = computed(() => {
     if (trace.operation_name.toLowerCase().includes(query)) {
       return true;
     }
+    if (trace.custom_name && trace.custom_name.toLowerCase().includes(query)) {
+      return true;
+    }
     return false;
   });
 });

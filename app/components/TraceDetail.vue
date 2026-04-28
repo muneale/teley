@@ -10,6 +10,7 @@
         @select-span="handleSelectSpan"
         @compare="$emit('compare')"
         @share="handleShare"
+        @rename="handleRename"
       />
       <div
         v-else-if="loading"
@@ -55,6 +56,7 @@ defineEmits<{ compare: [] }>();
 const getTraceId = () => props.traceId;
 
 const { trace, spans, loading, error } = useTraceDetails(getTraceId);
+const { renameTrace } = useTraces();
 const selectedSpan = ref<Span>();
 const { width: spanPanelWidth, dragging: spanPanelDragging, onMouseDown: onSpanPanelMouseDown } = useResizablePanel('span-panel-width', 400);
 const waterfallRef = ref<InstanceType<typeof TraceWaterfall> | null>(null);
@@ -66,6 +68,12 @@ watch(getTraceId, () => {
 
 function handleSelectSpan(span: Span) {
   selectedSpan.value = span;
+}
+
+async function handleRename(name: string | null) {
+  if (!trace.value) return;
+  await renameTrace(trace.value.trace_id, name);
+  trace.value = { ...trace.value, custom_name: name?.trim() || undefined };
 }
 
 async function handleShare() {

@@ -20,6 +20,11 @@ export async function getTrace(traceId: string): Promise<Trace | undefined> {
   return db.traces.get(traceId);
 }
 
+export async function setTraceCustomName(traceId: string, customName: string | null): Promise<void> {
+  const value = customName?.trim();
+  await db.traces.update(traceId, { custom_name: value || undefined });
+}
+
 export async function clearTraces(): Promise<void> {
   await db.traces.clear();
   await db.spans.clear();

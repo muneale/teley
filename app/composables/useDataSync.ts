@@ -7,6 +7,7 @@ import {
   upsertSpans,
   upsertLog,
   upsertMetric,
+  getTrace,
 } from '../database/operations';
 
 // Event bus for notifying components of new data
@@ -135,6 +136,12 @@ export function useDataSync() {
 
     // Track service name
     addTraceServiceName(trace.service_name);
+
+    // Preserve user-set custom name across incoming updates
+    const existing = await getTrace(trace.trace_id);
+    if (existing?.custom_name && !trace.custom_name) {
+      trace.custom_name = existing.custom_name;
+    }
 
     // Save to IndexedDB
     await upsertTrace(trace);

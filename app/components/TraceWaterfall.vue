@@ -3,10 +3,50 @@
     <!-- Header -->
     <div class="bg-zinc-900 border-b border-zinc-800 p-6">
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xl font-semibold text-zinc-100">
-            {{ trace.operation_name }}
-          </h2>
+        <div class="flex items-center justify-between mb-3 gap-3">
+          <div class="flex-1 min-w-0">
+            <div v-if="renaming" class="flex items-center gap-2">
+              <input
+                ref="renameInputRef"
+                v-model="renameDraft"
+                type="text"
+                placeholder="Custom trace name…"
+                class="flex-1 min-w-0 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-lg font-semibold text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                @keydown.enter="commitRename"
+                @keydown.esc="cancelRename"
+                @blur="commitRename"
+              />
+            </div>
+            <div v-else class="flex items-center gap-2 group/title min-w-0">
+              <h2
+                v-if="trace.custom_name"
+                class="text-xl font-semibold text-zinc-100 truncate flex items-center gap-2"
+              >
+                <IconPhTagBold class="w-4 h-4 text-amber-400 shrink-0" />
+                <span class="truncate">{{ trace.custom_name }}</span>
+                <span class="text-sm font-normal text-zinc-500 truncate">{{ trace.operation_name }}</span>
+              </h2>
+              <h2 v-else class="text-xl font-semibold text-zinc-100 truncate">
+                {{ trace.operation_name }}
+              </h2>
+              <button
+                v-if="!readonly"
+                @click="startRename"
+                class="p-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0"
+                :title="trace.custom_name ? 'Rename' : 'Add custom name'"
+              >
+                <IconPhPencilSimpleBold class="w-3.5 h-3.5" />
+              </button>
+              <button
+                v-if="trace.custom_name && !readonly"
+                @click="clearName"
+                class="p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-800 opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0"
+                title="Clear custom name"
+              >
+                <IconPhXBold class="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
           <div class="flex items-center gap-2">
             <button
               @click="$emit('share')"
@@ -172,14 +212,40 @@ import SourceIcon from './SourceIcon.vue';
 interface Props {
   trace: Trace;
   spans: Span[];
+  readonly?: boolean;
 }
 
 const props = defineProps<Props>();
-defineEmits<{
+const emit = defineEmits<{
   selectSpan: [span: Span];
   compare: [];
   share: [];
+  rename: [name: string | null];
 }>();
+
+const renaming = ref(false);
+const renameDraft = ref('');
+const renameInputRef = ref<HTMLInputElement | null>(null);
+
+function startRename() {
+  renameDraft.value = props.trace.custom_name ?? '';
+  renaming.value = true;
+  nextTick(() => renameInputRef.value?.focus());
+}
+function commitRename() {
+  if (!renaming.value) return;
+  renaming.value = false;
+  const next = renameDraft.value.trim();
+  const current = props.trace.custom_name ?? '';
+  if (next === current) return;
+  emit('rename', next || null);
+}
+function cancelRename() {
+  renaming.value = false;
+}
+function clearName() {
+  emit('rename', null);
+}
 
 const { width: nameColWidth, dragging: nameColDragging, onMouseDownLeft: onNameColMouseDown } = useResizablePanel('waterfall-name-col', 250, { min: 150, max: 500 });
 const shareLabel = ref('Share');
