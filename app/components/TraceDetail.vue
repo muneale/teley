@@ -4,7 +4,6 @@
     <main class="flex-1 overflow-y-auto relative bg-zinc-950">
       <TraceWaterfall
         v-if="trace && spans.length > 0"
-        ref="waterfallRef"
         :trace="trace"
         :spans="spans"
         @select-span="handleSelectSpan"
@@ -45,6 +44,7 @@
 
 <script setup lang="ts">
 import type { Span } from '@types';
+import { openInSpanshot } from '~/utils/spanshot';
 
 interface Props {
   traceId: string;
@@ -59,7 +59,6 @@ const { trace, spans, loading, error } = useTraceDetails(getTraceId);
 const { renameTrace } = useTraces();
 const selectedSpan = ref<Span>();
 const { width: spanPanelWidth, dragging: spanPanelDragging, onMouseDown: onSpanPanelMouseDown } = useResizablePanel('span-panel-width', 400);
-const waterfallRef = ref<InstanceType<typeof TraceWaterfall> | null>(null);
 
 // Reset selected span when trace changes
 watch(getTraceId, () => {
@@ -76,24 +75,9 @@ async function handleRename(name: string | null) {
   trace.value = { ...trace.value, custom_name: name?.trim() || undefined };
 }
 
-async function handleShare() {
+// Open the trace in Spanshot (spanshot.dev) in a new tab.
+function handleShare() {
   if (!trace.value) return;
-
-  try {
-    waterfallRef.value?.setShareLabel('Sharing...');
-    const res = await fetch('/api/share', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ trace: trace.value, spans: spans.value }),
-    });
-    const { id } = await res.json();
-    const url = `${window.location.origin}/shared/${id}`;
-    await navigator.clipboard.writeText(url);
-    waterfallRef.value?.setShareLabel('Copied!');
-    setTimeout(() => waterfallRef.value?.setShareLabel('Share'), 2000);
-  } catch (err) {
-    console.error('Failed to share trace:', err);
-    waterfallRef.value?.setShareLabel('Share');
-  }
+  void openInSpanshot(trace.value, spans.value);
 }
 </script>

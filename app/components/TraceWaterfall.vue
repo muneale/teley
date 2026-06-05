@@ -50,10 +50,11 @@
           <div class="flex items-center gap-2">
             <button
               @click="$emit('share')"
+              title="Open this trace in Spanshot (spanshot.dev)"
               class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
             >
               <IconPhShareNetworkBold class="w-3.5 h-3.5" />
-              {{ shareLabel }}
+              Share
             </button>
             <button
               @click="$emit('compare')"
@@ -248,9 +249,7 @@ function clearName() {
 }
 
 const { width: nameColWidth, dragging: nameColDragging, onMouseDownLeft: onNameColMouseDown } = useResizablePanel('waterfall-name-col', 250, { min: 150, max: 500 });
-const shareLabel = ref('Share');
 const zoomedOut = ref(true);
-defineExpose({ setShareLabel: (label: string) => { shareLabel.value = label; } });
 
 const spanTree = computed(() => buildSpanTree(props.spans, props.trace));
 

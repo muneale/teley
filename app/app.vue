@@ -142,7 +142,7 @@ const viewerCount = ref(0);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const isViewerRoute = computed(() =>
-  route.path.startsWith('/live/') || route.path.startsWith('/shared/')
+  route.path.startsWith('/live/')
 );
 
 // Subscribe to viewer count updates
