@@ -2,6 +2,8 @@
   "name": "teley",
   "type": "module",
   "private": true,
+  "license": "Apache-2.0",
+  "author": "Abdelrahman Awad",
   "scripts": {
     "build": "nuxt generate",
     "dev": "nuxt dev",
